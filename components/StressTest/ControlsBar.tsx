@@ -60,6 +60,7 @@ const LongPressDialogButton: React.FC<{
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
+        className="select-none"
       >
         {children}
       </Button>

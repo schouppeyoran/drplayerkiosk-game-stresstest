@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">com.drgt.drplayerkiosk.game.stresstest</string>
+    <string name="title_activity_main">com.drgt.drplayerkiosk.game.stresstest</string>
+    <string name="package_name">drplayerkiosk.game.stresstest</string>
+    <string name="custom_url_scheme">drplayerkiosk.game.stresstest</string>
+</resources>

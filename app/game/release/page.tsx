@@ -1,15 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import React from "react";
 
-const StressTest = dynamic(() => import("@/components/StressTest/StressTest"), {
+const ReleaseGame = dynamic(() => import("./ReleaseGame"), {
   ssr: false,
 });
 
-export default function GamePage() {
+export default function ReleaseGamePage() {
   return (
     <main className="h-screen w-screen bg-black flex items-center justify-center">
-      <StressTest />
+      <ReleaseGame />
     </main>
   );
 }

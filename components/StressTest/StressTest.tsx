@@ -7,17 +7,8 @@ function randomCoord(max: number) {
 
 const StressTest = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const width = 720;
-  const height = 1280;
-
-  // FPS counter state
-  const [fps, setFps] = useState(0);
-  // Enable/disable animated line effect
-  const [linesEnabled, setLinesEnabled] = useState(true);
-  // State for lines per spawn and spawn speed (ms)
-  const [linesPerSpawn, setLinesPerSpawn] = useState(1);
-  const [lineSpawnSpeed, setLineSpawnSpeed] = useState(500);
-  const [randomLineColor, setRandomLineColor] = useState(false);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
 
   // Store all active lines in a ref for animation
   type Line = {
@@ -31,8 +22,30 @@ const StressTest = () => {
   };
   const linesRef = useRef<Line[]>([]);
 
-  // Animation loop for all lines
+  // Set width/height to window size on client only, and clear lines on resize
   useEffect(() => {
+    function handleResize() {
+      setWidth(window.innerWidth);
+      setHeight(window.innerHeight);
+      linesRef.current = [];
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // FPS counter state
+  const [fps, setFps] = useState(0);
+  // Enable/disable animated line effect
+  const [linesEnabled, setLinesEnabled] = useState(true);
+  // State for lines per spawn and spawn speed (ms)
+  const [linesPerSpawn, setLinesPerSpawn] = useState(1);
+  const [lineSpawnSpeed, setLineSpawnSpeed] = useState(500);
+  const [randomLineColor, setRandomLineColor] = useState(false);
+
+  // Animation loop for all lines (only when width/height are set)
+  useEffect(() => {
+    if (width === 0 || height === 0) return;
     let running = true;
     function draw() {
       if (!running) return;
@@ -84,7 +97,6 @@ const StressTest = () => {
     }
   }
 
-  // Call this to spawn a new animated edge-to-opposite-edge line
   // Helper to generate a random hex color
   function randomHexColor() {
     return `#${Math.floor(Math.random() * 0xffffff)
@@ -93,6 +105,7 @@ const StressTest = () => {
   }
 
   const spawnLine = useCallback(() => {
+    if (width === 0 || height === 0) return;
     // Pick a random edge (0=top, 1=right, 2=bottom, 3=left)
     const startEdge = Math.floor(Math.random() * 4);
     // Opposite edge: (0<->2), (1<->3)
@@ -113,18 +126,17 @@ const StressTest = () => {
       duration,
       color: randomLineColor ? randomHexColor() : undefined,
     });
-  }, [randomLineColor]);
+  }, [randomLineColor, width, height]);
 
-  // For demo: spawn lines at the selected interval if enabled
   useEffect(() => {
-    if (!linesEnabled) return;
+    if (!linesEnabled || width === 0 || height === 0) return;
     const interval = setInterval(() => {
       for (let i = 0; i < linesPerSpawn; i++) {
         spawnLine();
       }
     }, lineSpawnSpeed);
     return () => clearInterval(interval);
-  }, [linesEnabled, spawnLine, linesPerSpawn, lineSpawnSpeed]);
+  }, [linesEnabled, spawnLine, linesPerSpawn, lineSpawnSpeed, width, height]);
 
   // FPS counter effect
   useEffect(() => {
@@ -150,6 +162,8 @@ const StressTest = () => {
     };
   }, []);
 
+  // Only render canvas and controls when width/height are set
+  if (width === 0 || height === 0) return null;
   return (
     <div style={{ width, height, position: "relative" }}>
       <canvas

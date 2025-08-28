@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import Image from "next/image";
 
+// TO DO: MOVE THE COLORS TO A THEME COFIG FILE
 const RING_SIZE = 320; // px (w-80)
 const RING_THICKNESS = 12; // px - you have to DECREASE this to make the ring THICKER, I don't feel like fixing this inversion right now
 const SEGMENTS = 24;
@@ -85,7 +86,7 @@ const PressButton = ({
       />
       {/* Button overlays Phaser ring */}
       <button
-        className="w-64 h-64 bg-slate-400 rounded-full cursor-pointer pointer-events-auto flex items-center justify-center shadow-2xl relative z-10 select-none"
+        className="w-64 h-64 bg-slate-800 rounded-full cursor-pointer pointer-events-auto flex items-center justify-center shadow-2xl relative z-10 select-none"
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
         onMouseUp={onMouseUp}

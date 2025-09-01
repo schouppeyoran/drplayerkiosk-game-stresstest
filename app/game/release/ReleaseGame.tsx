@@ -5,31 +5,57 @@ const ReleaseGame = () => {
   // --- Counter logic ---
   const [started, setStarted] = useState(false);
   const [display, setDisplay] = useState("0");
+  const [gameResult, setGameResult] = useState<boolean | null | undefined>(
+    undefined
+  ); // null/undefined = idle/play, true = win, false = lose
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
+  const clearTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const resetGame = () => {
+    clearTimer();
+    setStarted(false);
+    setDisplay("0"); // Reset display to 0 on reset
+    setGameResult(undefined);
+    startTimeRef.current = null;
+  };
+
   const handlePress = () => {
-    if (started) return;
+    if (started || (gameResult !== undefined && gameResult !== null)) return;
+    clearTimer(); // Always clear any previous timer
     setStarted(true);
     startTimeRef.current = Date.now();
     setDisplay("0.00");
     timerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - (startTimeRef.current || 0)) / 1000;
+      if (!startTimeRef.current) return;
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
       setDisplay(elapsed.toFixed(2));
     }, 16);
   };
+  // Cleanup timer on unmount
+  React.useEffect(() => {
+    return () => {
+      clearTimer();
+    };
+  }, []);
 
   const handleRelease = () => {
-    if (!started) return;
-    if (timerRef.current) clearInterval(timerRef.current);
-    const elapsed = (Date.now() - (startTimeRef.current || 0)) / 1000;
+    if (!started || !startTimeRef.current) return;
+    clearTimer();
+    const elapsed = (Date.now() - startTimeRef.current) / 1000;
     setStarted(false);
-    setDisplay("0");
-    // TODO: Show win/lose feedback
-    alert(`You released at ${elapsed.toFixed(2)} seconds!`);
+    setDisplay(elapsed.toFixed(2)); // Display final value when button is released
+    // Win if released between 9.95 and 10.05 seconds
+    const win = elapsed >= 9.95 && elapsed <= 10.05;
+    setGameResult(win ? true : false);
+    startTimeRef.current = null;
   };
-
-  // --- End counter logic ---
 
   // ...existing code for width/height/canvas...
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -73,24 +99,37 @@ const ReleaseGame = () => {
           pointerEvents: "none",
         }}
       >
-        <div
-          style={{
-            fontSize: 96,
-            color: "#fff",
-            marginBottom: 48,
-            fontWeight: "bold",
-            textAlign: "center",
-            pointerEvents: "auto",
-          }}
-        >
-          {display}
+        <div>
+          <h1 className="text-6xl">{display}</h1>
         </div>
         <PressButton
           onMouseDown={handlePress}
           onTouchStart={handlePress}
           onMouseUp={handleRelease}
           onTouchEnd={handleRelease}
+          gameResult={gameResult}
         />
+        {/* Show reset button after win/lose */}
+        {(gameResult === true || gameResult === false) && (
+          <button
+            style={{
+              marginTop: 32,
+              fontSize: 24,
+              padding: "12px 32px",
+              borderRadius: 8,
+              background: gameResult ? "#22c55e" : "#b91c1c",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              pointerEvents: "auto",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              transition: "background 0.2s",
+            }}
+            onClick={resetGame}
+          >
+            Reset
+          </button>
+        )}
       </div>
     </div>
   );

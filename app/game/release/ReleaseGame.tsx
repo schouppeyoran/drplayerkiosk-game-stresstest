@@ -100,8 +100,41 @@ const ReleaseGame = () => {
           pointerEvents: "none",
         }}
       >
-        <div>
-          <h1 className="text-6xl">{display}</h1>
+        {/* Counter with animated progress fill */}
+        <div
+          className="relative w-128 h-3/5 flex items-center justify-center rounded-3xl overflow-hidden shadow-lg mb-8 translate-y-24"
+          style={{ background: "#222" }}
+        >
+          {/* Progress fill background */}
+          <div
+            className="absolute left-0 bottom-0 w-full transition-all duration-300"
+            style={{
+              height: (() => {
+                // Only fill while holding or after release
+                const val = parseFloat(display);
+                if (gameResult === true) return "100%";
+                if (gameResult === false) return "100%";
+                if (started) return `${Math.min((val / 10) * 100, 100)}%`;
+                return `${Math.min((val / 10) * 100, 100)}%`;
+              })(),
+              background:
+                gameResult === true
+                  ? "linear-gradient(0deg, #22c55e 0%, #4ade80 100%)"
+                  : gameResult === false
+                  ? "linear-gradient(0deg, #b91c1c 0%, #f87171 100%)"
+                  : "linear-gradient(0deg, #a21caf 0%, #7c3aed 100%)",
+              zIndex: 1,
+              transition:
+                "height 0.3s cubic-bezier(.4,2,.6,1), background 0.2s",
+            }}
+          />
+          {/* Counter text */}
+          <h1
+            className="text-6xl font-bold relative z-10 select-none"
+            style={{ color: "#fff", textShadow: "0 2px 8px #000a" }}
+          >
+            {display}
+          </h1>
         </div>
         <PressButton
           onMouseDown={handlePress}

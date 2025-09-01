@@ -16,7 +16,7 @@ const RING_ROTATE_SPEED_IDLE = 0.01;
 const RING_ROTATE_SPEED_PLAY = 0.045;
 const RING_ROTATE_SPEED_WIN = 0.02;
 const RING_ROTATE_SPEED_LOSE = 0.005;
-const BUTTON_BG_COLOR_IDLE = "#1e293b"; // slate-800
+const BUTTON_BG_COLOR_IDLE = "#756106ff"; // slate-800
 const BUTTON_BG_COLOR_PLAY = "#6d28d9"; // purple
 const BUTTON_BG_COLOR_WIN = "#22c55e"; // green
 const BUTTON_BG_COLOR_LOSE = "#b91c1c"; // red
@@ -53,25 +53,30 @@ const PressButton = ({
   const isLose = gameResult === false;
 
   // Set ring speed and color based on state
-  useEffect(() => {
-    if (isWin) {
-      ringSpeedRef.current = RING_ROTATE_SPEED_WIN;
-      ringColorsRef.current = RING_COLORS_WIN;
-    } else if (isLose) {
-      ringSpeedRef.current = RING_ROTATE_SPEED_LOSE;
-      ringColorsRef.current = RING_COLORS_LOSE;
-    } else if (isPlaying) {
-      ringSpeedRef.current = RING_ROTATE_SPEED_PLAY;
-      ringColorsRef.current = RING_COLORS_PLAY;
-    } else {
-      ringSpeedRef.current = RING_ROTATE_SPEED_IDLE;
-      ringColorsRef.current = RING_COLORS_IDLE;
-    }
-  }, [isWin, isLose, isPlaying]);
+  const ringColors = isWin
+    ? RING_COLORS_WIN
+    : isLose
+    ? RING_COLORS_LOSE
+    : isPlaying
+    ? RING_COLORS_PLAY
+    : RING_COLORS_IDLE;
+  const ringSpeed = isWin
+    ? RING_ROTATE_SPEED_WIN
+    : isLose
+    ? RING_ROTATE_SPEED_LOSE
+    : isPlaying
+    ? RING_ROTATE_SPEED_PLAY
+    : RING_ROTATE_SPEED_IDLE;
+  // Use a key to force remount of Phaser ring when color set changes
+  const ringKey = ringColors.join("-");
 
-  // Phaser ring
+  // Phaser ring: destroy and recreate when ringColors or ringSpeed changes
   useEffect(() => {
-    if (phaserGameRef.current || !phaserRef.current) return;
+    if (!phaserRef.current) return;
+    if (phaserGameRef.current) {
+      phaserGameRef.current.destroy(true);
+      phaserGameRef.current = null;
+    }
     let ringContainer: Phaser.GameObjects.Container;
     let graphics: Phaser.GameObjects.Graphics;
     let destroyed = false;
@@ -93,7 +98,7 @@ const PressButton = ({
             graphics.beginPath();
             graphics.fillStyle(
               Phaser.Display.Color.HexStringToColor(
-                ringColorsRef.current[i % ringColorsRef.current.length]
+                ringColors[i % ringColors.length]
               ).color,
               1
             );
@@ -106,7 +111,7 @@ const PressButton = ({
         },
         update() {
           if (ringContainer && !destroyed) {
-            ringContainer.rotation += ringSpeedRef.current;
+            ringContainer.rotation += ringSpeed;
           }
         },
       },
@@ -116,22 +121,7 @@ const PressButton = ({
       phaserGameRef.current?.destroy(true);
       phaserGameRef.current = null;
     };
-  }, []);
-
-  // Pulse animation for button background (only during play/held)
-  const [pulse, setPulse] = useState(false);
-  useEffect(() => {
-    if (isPlaying) {
-      setPulse(true);
-      const timeout = setTimeout(
-        () => setPulse(false),
-        BUTTON_BG_PULSE_DURATION
-      );
-      return () => clearTimeout(timeout);
-    } else {
-      setPulse(false);
-    }
-  }, [isPlaying]);
+  }, [ringKey, ringSpeed]);
 
   // Handlers for hold state
   const handlePointerDown = (
@@ -167,7 +157,7 @@ const PressButton = ({
 
   // Pulse effect only when playing/held
   let pulseBg = buttonBg;
-  if (isPlaying && (held || pulse)) {
+  if (isPlaying && (held || pulseBg)) {
     pulseBg = `radial-gradient(circle at 50% 50%, ${BUTTON_BG_PULSE_COLOR} 0%, ${buttonBg} 80%)`;
   }
 

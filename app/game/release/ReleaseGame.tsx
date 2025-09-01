@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import PressButton from "./PressButton";
+import { Button } from "@/components/ui/button";
 
 const ReleaseGame = () => {
   // --- Counter logic ---
@@ -111,24 +112,13 @@ const ReleaseGame = () => {
         />
         {/* Show reset button after win/lose */}
         {(gameResult === true || gameResult === false) && (
-          <button
-            style={{
-              marginTop: 32,
-              fontSize: 24,
-              padding: "12px 32px",
-              borderRadius: 8,
-              background: gameResult ? "#22c55e" : "#b91c1c",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              pointerEvents: "auto",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-              transition: "background 0.2s",
-            }}
+          <Button
+            variant="destructive"
+            className="absolute bottom-12 pointer-events-auto"
             onClick={resetGame}
           >
             Reset
-          </button>
+          </Button>
         )}
       </div>
     </div>

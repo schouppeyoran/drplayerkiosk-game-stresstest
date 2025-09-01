@@ -21,7 +21,6 @@ const BUTTON_BG_COLOR_PLAY = "#6d28d9"; // purple
 const BUTTON_BG_COLOR_WIN = "#22c55e"; // green
 const BUTTON_BG_COLOR_LOSE = "#b91c1c"; // red
 const BUTTON_BG_PULSE_COLOR = "#a21caf"; // pulse color (play only)
-const BUTTON_BG_PULSE_DURATION = 600; // ms
 const BUTTON_IMAGE_SRC = "/icons/press.svg";
 const BUTTON_IMAGE_SIZE = 128;
 
@@ -162,7 +161,11 @@ const PressButton = ({
   }
 
   return (
-    <div className="w-80 h-80 flex items-center justify-center rounded-full inset-shadow-2xl shadow-white relative select-none">
+    <div
+      className={`w-80 h-80 flex items-center justify-center rounded-full inset-shadow-2xl shadow-white relative select-none ${
+        held && "scale-bounce-fast"
+      }`}
+    >
       {/* Phaser ring canvas */}
       <div
         ref={phaserRef}
@@ -176,23 +179,13 @@ const PressButton = ({
           zIndex: 1,
         }}
       />
-      {/* Button background (fully opaque, pulse only when playing/held) */}
-      <div
-        className="absolute left-1/2 top-1/2 rounded-full"
-        style={{
-          width: 256,
-          height: 256,
-          transform: "translate(-50%, -50%)",
-          background: pulseBg,
-          opacity: 1,
-          transition: `background ${BUTTON_BG_PULSE_DURATION}ms`,
-          zIndex: 2,
-        }}
-      />
+
       {/* Button overlays Phaser ring */}
       <button
         className="w-64 h-64 rounded-full cursor-pointer pointer-events-auto flex items-center justify-center shadow-2xl relative z-10 select-none"
-        style={{ background: "transparent" }}
+        style={{
+          background: pulseBg,
+        }}
         onMouseDown={handlePointerDown}
         onTouchStart={handlePointerDown}
         onMouseUp={handlePointerUp}

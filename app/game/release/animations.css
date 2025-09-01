@@ -13,3 +13,7 @@
 .scale-bounce {
   animation: scale-bounce 2s infinite;
 }
+
+.scale-bounce-fast {
+  animation: scale-bounce 500ms infinite;
+}
